@@ -30,7 +30,7 @@ const config = Config.fromEnv();
 const hashIds = new Hashids(config.hashidsHash);
 const eventMgr = new EventManager();
 const pascalRPCClient = new PascalRPCClient(config.host, config.port);
-const chain = new BlockChain(eventMgr);
+const chain = new BlockChain(eventMgr, pascalRPCClient);
 const subscriptionManager = new SubscriptionManager(hashIds);
 
 new Server(
