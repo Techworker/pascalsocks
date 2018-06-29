@@ -1,0 +1,33 @@
+{
+  "block": 0,
+  "time": 1524232938,
+  "opblock": 0,
+  "maturation": null,
+  "optype": 6,
+  "subtype": 61,
+  "account": 19073,
+  "signer_account": 19073,
+  "n_operation": 4,
+  "senders": [
+    {
+      "account": 19073,
+      "n_operation": 4,
+      "amount": 1,
+      "payload": ""
+    }
+  ],
+  "receivers": [
+    {
+      "account": 11556,
+      "amount": 1,
+      "payload": ""
+    }
+  ],
+  "changers": [],
+  "optxt": "Buy account 11556-20 for 1.0000 PASC",
+  "fee": 0,
+  "amount": -1,
+  "payload": "",
+  "ophash": "00000000814A00000400000098E3D0C9157C802BC72489BB6149AC2536A9D470",
+  "old_ophash": ""
+}

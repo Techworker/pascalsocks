@@ -1,0 +1,26 @@
+{
+  "block": 5369,
+  "time": 1524233323,
+  "opblock": 0,
+  "maturation": 1,
+  "optype": 8,
+  "subtype": 81,
+  "account": 11556,
+  "signer_account": 11556,
+  "n_operation": 12,
+  "senders": [],
+  "receivers": [],
+  "changers": [
+    {
+      "account": 11556,
+      "n_operation": 12,
+      "new_name": "newname",
+      "new_type": 54321
+    }
+  ],
+  "optxt": "Changed name,type of account 11556-20",
+  "fee": 0,
+  "amount": 0,
+  "payload": "",
+  "ophash": "F9140000242D00000C0000002FE35D7BB0A612E90A1CB77852DADE6543F82B75"
+}

@@ -1,0 +1,26 @@
+{
+  "block": 0,
+  "time": 1524233110,
+  "opblock": 0,
+  "maturation": null,
+  "optype": 8,
+  "subtype": 81,
+  "account": 11556,
+  "signer_account": 11556,
+  "n_operation": 10,
+  "senders": [],
+  "receivers": [],
+  "changers": [
+    {
+      "account": 11556,
+      "n_operation": 10,
+      "new_name": "testben2"
+    }
+  ],
+  "optxt": "Changed name of account 11556-20",
+  "fee": 0,
+  "amount": 0,
+  "payload": "",
+  "ophash": "00000000242D00000A000000BEBCDB29A6F2667E5AC93FFD5C3B0E6B38A347A1",
+  "old_ophash": ""
+}

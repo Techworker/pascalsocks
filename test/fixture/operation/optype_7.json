@@ -1,0 +1,26 @@
+{
+  "block": 5350,
+  "time": 1524232727,
+  "opblock": 0,
+  "maturation": 0,
+  "optype": 7,
+  "subtype": 71,
+  "account": 11556,
+  "signer_account": 11556,
+  "n_operation": 6,
+  "senders": [],
+  "receivers": [],
+  "changers": [
+    {
+      "account": 11556,
+      "n_operation": 6,
+      "new_enc_pubkey": "CA0220002D36A816C75005FA5818A5D4D0773AFEBB681CE6308224AF3496FDE3DC03268D20004F4157080BEC67A07F4227C88042C926A9F5E20FC829B8332F9BA14F5BA9929C"
+    }
+  ],
+  "optxt": "Change 11556-20 account key to secp256k1",
+  "fee": 0,
+  "amount": 0,
+  "payload": "",
+  "enc_pubkey": "CA0220002D36A816C75005FA5818A5D4D0773AFEBB681CE6308224AF3496FDE3DC03268D20004F4157080BEC67A07F4227C88042C926A9F5E20FC829B8332F9BA14F5BA9929C",
+  "ophash": "E6140000242D000006000000124DC6542BB7B1A0D2FAB34A26572E88E5444CBD"
+}
