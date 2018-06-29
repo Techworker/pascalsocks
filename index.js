@@ -23,7 +23,6 @@ const BlockChannel = require('./lib/Channels/Block');
 const AccountChannel = require('./lib/Channels/Account');
 const PascalRPCClient = require('./lib/PascalRPCClient');
 const BlockChain = require('./lib/BlockChain');
-const Subscription = require('./lib/Subscription');
 const Config = require('./lib/Config');
 
 const config = Config.fromEnv();
