@@ -5,7 +5,7 @@ socket.on('open', function () {
     console.log('open..');
 
     socket.send(JSON.stringify({
-        'event': 'subscribe',
+        'action': 'subscribe',
         'channel': 'account'
     }));
 });

@@ -9,7 +9,7 @@
 
 'use strict';
 
-const BuyAccountOpInfo = require('../../../lib/BlockChain/OperationInfo/BuyAccount');
+const BuyAccountOpInfo = require('../../../lib/BlockChain/OperationInfo/Buy');
 const AccountNumber = require('../../../lib/BlockChain/Type/AccountNumber');
 const PascalCurrency = require('../../../lib/BlockChain/Type/PascalCurrency');
 

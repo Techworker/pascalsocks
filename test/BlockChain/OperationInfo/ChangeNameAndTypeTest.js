@@ -9,7 +9,7 @@
 
 'use strict';
 
-const ChangeNameAndTypeTypeOpInfo = require('../../../lib/BlockChain/OperationInfo/ChangeAccountInfo');
+const ChangeNameAndTypeTypeOpInfo = require('../../../lib/BlockChain/OperationInfo/ChangeName');
 const AccountNumber = require('../../../lib/BlockChain/Type/AccountNumber');
 
 const assert = require('assert');
