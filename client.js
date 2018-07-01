@@ -6,10 +6,22 @@ socket.on('open', function () {
 
     socket.send(JSON.stringify({
         'action': 'subscribe',
-        'channel': 'account'
+        'channel': 'operation',
+        snapshot: 100,
+        'filters': [
+            {
+                field: 'message',
+                type: 'startsWith',
+                value: 'welcome'
+            }
+        ]
+
+
     }));
 });
 
 socket.on('message', function (data) {
-    console.log(JSON.parse(data));
+    let d = JSON.parse(data);
+    console.log(d.event);
+    console.log(d.message);
 });
