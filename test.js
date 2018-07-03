@@ -6,3 +6,5 @@ let obj = {
     }
 };
 
+const A = require('./lib/Channels/Account');
+console.log(A);

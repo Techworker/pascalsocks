@@ -1,6 +1,6 @@
-# PascalSox
+# PascalSocks
 
-A nodejs websocket application server to listen for changes in the PascalCoin blockchain.
+A websocket application server that serves events of the PascalCoin blockchain in real time.
 
 ## Installation
 
@@ -14,14 +14,72 @@ Clone the repository and install all dependencies.
 
 ````shell
 git clone https://todo
-cd pascalsocks
+cd pascalsocksockc
 npm install
 npm run pascalsocks
 ````
 
 ## Introduction
 
-Each message sent and received via the websocket is encoded in JSON format. You can use whatever language you like to create client applications, as long as they understand the websocket protocol.
+This application was developed to take away the burden of polling and evaluating data from and to help developing realtime services on top of the PascalCoin Blockchain.
+
+It uses the WebSockets protocol to deliver events on the BlockChain. WebSockets are an accepted global standard and have implementations in nearly all languages, which lowers the implementation work to understand the servers protocol. 
+
+## Client - Server - Client communication
+
+Each message transmitted through the WebSocket protocol is encoded in JSON format and follows a strict rule definition.
+
+The client application will send *actions* to the server while the server application will respond with *events*.
+
+Messages sent from the client to the server have the following format:
+
+```
+{
+    "action": "",
+    "params": {}
+}
+```
+
+The messages `action`  parameter describes the intend of the sent message. There are 2 possible values:
+
+`subscribe`
+
+Will subscribe to some event fired by the webserver.
+
+` unsubscribe`
+
+Will unsubscribe the client from a previously created subscription. Unsubscribing from the websocket does not cut the connection.  
+
+Messages sent from the server to the client have the following format:
+
+```
+{
+    "event": "",
+    "data": {}
+}
+```
+
+The messages `event` value describes the event that took place and also gives a slight outlook of what the client can find in the `data` object of the message.
+
+## Events and channels
+
+The application has a list of channels, and each channel can serve a variable number of events. While not strictly necessary, this categorization helps to keep things organized on the client- as well as on the server- side.
+
+There are 3 built-in channels for the most logic events, but you as a developer are free to extend the application with more channels and events or reduce the number of channels (and events inside the channel) that your appliaction instance will make available. `TODO: show config`
+
+### Built-in channels
+
+### Operation channel
+
+The operation channel provides events that are connected to the state of operations. The following events are available in the channel by default:
+
+#### Pending operation
+
+When a new pending operation arrives, this event will be distributed to each subscribed client 
+
+
+
+
 
 The messages sent between the client and the server will always have the following format:
 
