@@ -146,22 +146,22 @@ describe('OperationParser', function()
 
     });
 
-    describe('Operation type 6 - Buy account', function() {
+    describe('Operation type 6 - AccountBuy account', function() {
 
         it(`should return a valid response`, function () {
-            let buyAccountOp = operationParser.parse(6, 'Buy account 12345-54 for 100.0000 PASC');
+            let buyAccountOp = operationParser.parse(6, 'AccountBuy account 12345-54 for 100.0000 PASC');
             assert.equal('12345-54', buyAccountOp.account);
             assert.equal(true, buyAccountOp.amount.value.isEqualTo('100'));
         });
 
         it(`should return an invalid response`, function () {
-            let buyAccountOp = operationParser.parse(6, 'Buy account 12345- for 100.0000 PASC');
+            let buyAccountOp = operationParser.parse(6, 'AccountBuy account 12345- for 100.0000 PASC');
             assert.equal(null, buyAccountOp);
 
-            buyAccountOp = operationParser.parse(6, 'Buy account -6 for 100.0000 PASC');
+            buyAccountOp = operationParser.parse(6, 'AccountBuy account -6 for 100.0000 PASC');
             assert.equal(null, buyAccountOp);
 
-            buyAccountOp = operationParser.parse(6, 'Buy account 12345-54 for PASC');
+            buyAccountOp = operationParser.parse(6, 'AccountBuy account 12345-54 for PASC');
             assert.equal(null, buyAccountOp);
 
             buyAccountOp = operationParser.parse(6, 'delist account for sale');

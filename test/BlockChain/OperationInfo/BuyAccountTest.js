@@ -15,7 +15,7 @@ const PascalCurrency = require('../../../lib/BlockChain/Type/PascalCurrency');
 
 const assert = require('assert');
 
-describe('Buy', function()
+describe('AccountBuy', function()
 {
     it(`should work as expected..`, function () {
         const buyAccount = new BuyAccountOpInfo(new AccountNumber('12345-54'), new PascalCurrency(100));
