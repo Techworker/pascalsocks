@@ -20,8 +20,6 @@ class SubscriptionManager {
      */
   constructor(hashIds) {
     this.subscriptions = [];
-    this.subscriptionCounter = 0;
-    this.hashIds = hashIds;
   }
 
   /**
@@ -51,23 +49,40 @@ class SubscriptionManager {
      * @param {Subscription} subscription
      */
   unsubscribe(subscription) {
-    this.unsubscribeChannelId(
+    this.unsubscribeIdent(
       subscription.clientId,
-      subscription.channel,
-      subscription.channelId
+      subscription.ident
     );
   }
 
   /**
-     * Removes all subscriptions of the given clientId.
-     *
-     * @param {String} clientId
-     */
+   * Removes all subscriptions of the given clientId.
+   *
+   * @param {String} clientId
+   */
   unsubscribeClientId(clientId) {
     let removed = [];
 
     this.subscriptions = this.subscriptions.filter(sub => {
-      let keep = sub.isNotClientId(clientId);
+      let keep = (sub.clientId !== clientId);
+
+      if (!keep) removed.push(sub);
+      return keep;
+    });
+
+    return removed;
+  }
+
+  /**
+   * Removes all subscriptions of the given clientId.
+   *
+   * @param {String} clientId
+   */
+  unsubscribeEvent(clientId, event) {
+    let removed = [];
+
+    this.subscriptions = this.subscriptions.filter(sub => {
+      let keep = (sub.event === event && sub.clientId === clientId);
 
       if (!keep) removed.push(sub);
       return keep;
@@ -85,46 +100,16 @@ class SubscriptionManager {
      *
      * @return {Array<Subscription>}
      */
-  unsubscribeChannel(clientId, channel) {
+  unsubscribeIdent(clientId, event, ident) {
     let removed = [];
 
     this.subscriptions = this.subscriptions.filter(sub => {
-      let keep = (
-        sub.isNotClientId(clientId) ||
-                sub.isNotChannel(channel)
-      );
+      let keep = !(sub.clientId !== clientId && sub.event !== event && sub.ident !== ident);
 
       if (!keep) removed.push(sub);
       return keep;
     });
     // console.log(this.subscriptions);
-
-    return removed;
-  }
-
-  /**
-     * Removes all subscriptions of the given clientId and returns the removed
-     * subscriptions.
-     *
-     * @param {String} clientId
-     * @param {String} channel
-     * @param {String} channelId
-     *
-     * @return {Array<Subscription>}
-     */
-  unsubscribeChannelId(clientId, channel, channelId) {
-    let removed = [];
-
-    this.subscriptions = this.subscriptions.filter(sub => {
-      let keep = (
-        sub.isNotClientId(clientId) ||
-                sub.isNotChannel(channel) ||
-                sub.isNotChannelId(channelId)
-      );
-
-      if (!keep) removed.push(sub);
-      return keep;
-    });
 
     return removed;
   }
@@ -147,9 +132,9 @@ class SubscriptionManager {
      * @param channel
      * @returns {Array<Subscription>}
      */
-  getSubscriptionsOfChannel(channel) {
+  getSubscriptionsOfEvent(event) {
     return this.subscriptions.filter(
-      sub => sub.isChannel(channel) && sub.isActive()
+      sub => sub.event === event && sub.isActive()
     );
   }
 

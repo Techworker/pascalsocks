@@ -1,14 +1,5 @@
-// nodejs
-const WebSocket = require('ws');
-
 // npm
 const Hashids = require('hashids');
-
-// load .env
-const dotEnvResult = require('dotenv').config();
-if (dotEnvResult.error) {
-    throw dotEnvResult.error
-}
 
 const Server = require('./src/Server/Server');
 
@@ -48,27 +39,27 @@ const chain = new BlockChain(eventMgr, rpc);
 const subscriptionManager = new SubscriptionManager(hashIds);
 
 new Server(
-    config,
-    eventMgr,
-    new ClientManager(),
-    subscriptionManager,
-    rpc,
-    chain,
-    new Listener(rpc, chain),
-    new ChainLoader(rpc, chain),
-    new Channel([
-        EventBlockMined,
-        EventOperationPending,
-        EventOperationIncluded,
-        EventOperationMatured,
-        EventOperationNotIncluded,
-        EventTransaction,
-        EventAccountAdded,
-        EventAccountBuy,
-        EventAccountChangeKey,
-        EventAccountChangeName,
-        EventAccountChangeType,
-        EventAccountDelist,
-        EventAccountForSale
-    ], eventMgr, subscriptionManager)
+  config,
+  eventMgr,
+  new ClientManager(),
+  subscriptionManager,
+  rpc,
+  chain,
+  new Listener(rpc, chain),
+  new ChainLoader(rpc, chain),
+  new Channel([
+    EventBlockMined,
+    EventOperationPending,
+    EventOperationIncluded,
+    EventOperationMatured,
+    EventOperationNotIncluded,
+    EventTransaction,
+    EventAccountAdded,
+    EventAccountBuy,
+    EventAccountChangeKey,
+    EventAccountChangeName,
+    EventAccountChangeType,
+    EventAccountDelist,
+    EventAccountForSale
+  ], eventMgr, subscriptionManager)
 ).run();

@@ -66,7 +66,7 @@ class Channel {
      */
   react(event) {
     // fetch all subscriptions for this channel
-    const subscriptions = this.subscriptionManager.getSubscriptionsOfChannel(this.constructor.name);
+    const subscriptions = this.subscriptionManager.getSubscriptionsOfEvent(event.constructor.name());
 
     // now loop all subscriptions and fetch the ones which apply
     const matchedSubscriptions = subscriptions.filter(
