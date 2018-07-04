@@ -8,10 +8,9 @@
 <script>
   var client = new PascalSocks.Client('127.0.0.1:8080');
   client.connect().then(function() {
-      console.log('connected');
-      client.subscribe(PascalSocks.Events.AccountAdded.name(), 10, [], function(event) {
-        console.log(event)
-      });
+    client.subscribe(PascalSocks.Events.AccountAdded.name(), 100, [], function(event) {
+      console.log(event)
+    });
   }).catch(function(ex) {
       console.log(ex);
   });
