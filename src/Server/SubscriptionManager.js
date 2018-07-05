@@ -15,10 +15,8 @@ const Subscription = require('./Subscription');
 class SubscriptionManager {
   /**
      * Constructor.
-     *
-     * @param {Hashids} hashIds
      */
-  constructor(hashIds) {
+  constructor() {
     this.subscriptions = [];
   }
 
@@ -28,14 +26,14 @@ class SubscriptionManager {
      *
      * @param {String} clientId
      * @param {String} ident
-     * @param {String} eventName
+     * @param {String} event
      * @param {Number} snapshot
      * @param {Object} filters
      * @returns {Subscription}
      */
-  subscribe(clientId, ident, eventName, snapshot, filters = []) {
+  subscribe(clientId, ident, event, snapshot, filters = []) {
     const subscription = new Subscription(
-      clientId, ident, eventName, snapshot, filters
+      clientId, ident, event, snapshot, filters
     );
 
     this.subscriptions.push(subscription);
@@ -129,24 +127,12 @@ class SubscriptionManager {
   /**
      * Gets all subscriptions of the given channel.
      *
-     * @param channel
+     * @param {String} event
      * @returns {Array<Subscription>}
      */
   getSubscriptionsOfEvent(event) {
     return this.subscriptions.filter(
       sub => sub.event === event && sub.isActive()
-    );
-  }
-
-  /**
-     * Gets a subscription identified by the given id.
-     *
-     * @param {String} channelId
-     * @returns {Array<Subscription>}
-     */
-  getSubscriptionsOfChannelId(channelId) {
-    return this.subscriptions.filter(
-      sub => sub.isChannelId(channelId) && sub.isActive()
     );
   }
 }

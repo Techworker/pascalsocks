@@ -6,14 +6,12 @@
 <h1>Foundation accounts</h1>
 <script src="./PascalSocks.js"></script>
 <script>
+
   var client = new PascalSocks.Client('127.0.0.1:8080');
   client.connect().then(function() {
-    const accountAdded = PascalSocks.Events.AccountAdded.name();
-    client.subscribe(PascalSocks.Events.AccountAdded.name(), 0, [], function(event) {
-      const accNumber = new PascalSocks.Types.AccountNumber(event.account.accountNumber);
-      if(accNumber.account % 5 === 4) {
-        console.log("Foundation account: " + accNumber)
-      }
+    const ping = PascalSocks.Events.Ping.name();
+    client.subscribe(ping, 0, [], function(event) {
+      console.log('ping');
     });
   }).catch(function(ex) {
     console.log(ex);

@@ -51,9 +51,11 @@ class EventManager {
         ev.associated = event.block.blockNumber;
         // we need to make sure that NO events related to a pending
         // operation is recorded in the history
-        if (ev.operation === undefined || !ev.operation.isPending()) {
-          this.history.get(event.block.blockNumber).push(ev);
+        if ((ev.operation !== undefined && ev.operation.isPending()) || ev.constructor.name() === 'ping') {
+          return;
         }
+
+        this.history.get(event.block.blockNumber).push(ev);
       });
 
       let all = 0;

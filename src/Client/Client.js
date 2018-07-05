@@ -5,7 +5,8 @@ const EventWelcome = require('../Events/Welcome');
 
 /**
  * A pascalsocks client that should simplify the development of JS based
- * applications and can also serve as an implementation base.
+ * applications and can also serve as an implementation boilerplate for other
+ * languages.
  */
 class Client {
 
@@ -24,7 +25,7 @@ class Client {
 
     // handlers which are active and will all be called when the websocket sends
     // a new message
-    this.onMessageHandlers = new Map();
+    this.subscriptionHandlers = new Map();
 
     // a flag indicating whether we are trying to connect
     this.inConnect = false;
@@ -40,8 +41,10 @@ class Client {
    */
   connect() {
     return new Promise((resolve, reject) => {
-      // set inconnect flag
+      // set inConnect flag
       this.inConnect = true;
+
+      // try to establish connection
       try {
         this.socket = new WebSocket('ws://' + this.hostPort);
       } catch (ex) {
@@ -71,27 +74,32 @@ class Client {
       };
 
       // listen to 'welcome' message and then remove listener
-      this.onMessageHandlers.set('welcome', (message) => {
+      this.subscriptionHandlers.set('welcome', (message) => {
         if (message.event === EventWelcome.name()) {
-          this.onMessageHandlers.delete('welcome');
+          this.subscriptionHandlers.delete('welcome');
           this.clientId = message.id;
           resolve(message);
         }
       });
 
-      this.socket.onopen = (event) => {
+      this.socket.onopen = () => {
         // add the simple listener
         this.socket.onmessage = (event) => this.onMessage(event);
       };
     });
   }
 
+  /**
+   * Gets called whenever the socket receives a message.
+   *
+   * @param {Object} event
+   */
   onMessage(event) {
     const parsed = JSON.parse(event.data);
 
-    this.onMessageHandlers.forEach(
-      (handler, key) => handler(parsed, key)
-    );
+    if (this.subscriptionHandlers[parsed.ident] !== undefined) {
+      this.subscriptionHandlers[parsed.ident](parsed);
+    }
   }
 
   /**
@@ -108,32 +116,46 @@ class Client {
     const ident = helper.guid();
 
     // the promise to be executed
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // add a new onmessage handler that will check any given message
       // and if the ident matches AND it is a successful or errornous
       // subscription, we will resolve the promise and remove the
       // message handler.
-      this.onMessageHandlers.set(ident, (data) => {
+      this.subscriptionHandlers.set(ident, (data) => {
         if (data.ident === ident && data.event === EventSubscriptionSuccess.name()) {
-          this.onMessageHandlers.set(ident, (data) => {
+          resolve(data.ident);
+          this.subscriptionHandlers.set(ident, (data) => {
             if (data.ident === ident && data.event === event) {
               callback(data);
             }
           });
-          resolve(data);
         }
         if (data.ident === ident && data.event === EventSubscriptionError.name()) {
           reject(data);
         }
       });
+
+      this.socket.send(JSON.stringify({
+        action: 'subscribe',
+        snapshot, event, ident, filters
+      }));
+
     });
+  }
 
-    this.socket.send(JSON.stringify({
-      action: 'subscribe',
-      snapshot, event, ident, filters
-    }));
-
-    return promise;
+  /**
+   * Subscribes to the given event.
+   *
+   * @param {String} event
+   * @param {Array} filters
+   * @param {Function} callback
+   * @returns {Promise}
+   */
+  once(event, filters, callback) {
+    this.subscribe(event, 0, filters, (data) => {
+      this.subscriptionHandlers.delete(data.ident);
+      callback(data);
+    });
   }
 }
 

@@ -16,7 +16,8 @@ module.exports = {
     SubscriptionError: require('./src/Events/SubscriptionError'),
     SubscriptionSubscribed: require('./src/Events/SubscriptionSuccess'),
     Transaction: require('./src/Events/Transaction'),
-    Welcome: require('./src/Events/Welcome')
+    Welcome: require('./src/Events/Welcome'),
+    Ping: require('./src/Events/Ping')
   },
   Types: {
     Account: require('./src/Types/Account'),

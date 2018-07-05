@@ -30,7 +30,6 @@ class Config {
     return new Config(
       process.env.NODE_HOST,
       parseInt(process.env.NODE_PORT, 10),
-      process.env.HASHIDS_HASH,
       parseInt(process.env.BLOCK_HISTORY_LOOKBACK, 10),
       parseInt(process.env.LISTEN_INTERVAL, 10),
       parseInt(process.env.WS_PORT, 10),
@@ -41,16 +40,14 @@ class Config {
      *
      * @param {String} host
      * @param {Number} port
-     * @param {String} hashidsHash
      * @param {Number} blockLookBack
      * @param {Number} listenInterval
      * @param {Number} wsPort
      * @param {Boolean} debug
      */
-  constructor(host, port, hashidsHash, blockLookBack, listenInterval, wsPort, debug) {
+  constructor(host, port, blockLookBack, listenInterval, wsPort, debug) {
     this._host = host;
     this._port = port;
-    this._hashidsHash = hashidsHash;
     this._blockLookBack = blockLookBack;
     this._listenInterval = listenInterval;
     this._wsPort = wsPort;
@@ -73,15 +70,6 @@ class Config {
      */
   get port() {
     return this._port;
-  }
-
-  /**
-     * Gets the hashids string.
-     *
-     * @returns {String}
-     */
-  get hashidsHash() {
-    return this._hashidsHash;
   }
 
   /**

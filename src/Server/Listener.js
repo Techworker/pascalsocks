@@ -21,13 +21,12 @@ class Listener {
   /**
      * Constructor
      *
-     * @param {PascalRPCClient} pascalRPCClient
+     * @param {RPC} pascalRPCClient
      * @param {BlockChain} blockChain
      */
   constructor(pascalRPCClient, blockChain) {
     this.pascalRPCClient = pascalRPCClient;
     this.blockChain = blockChain;
-    this.working = false;
   }
 
   /**
@@ -57,13 +56,6 @@ class Listener {
      * changes.
      */
   async tick() {
-    // take care we don't get overrun
-    if (this.working) {
-      return;
-    }
-
-    this.working = true;
-
     // helper.debug(this, 'tick');
     // we'll fetch the block count to see if the latest block in memory
     // is lower than the block at the node
@@ -101,14 +93,8 @@ class Listener {
         continue;
       }
 
-      /* for (let [, account] of pendingOp.accounts.entries()) {
-                this.blockChain.addAccount(await this.pascalRPCClient.getAccount(account));
-            }*/
-
       await this.blockChain.addOperation(pendingOp);
     }
-
-    this.working = false;
   }
 }
 

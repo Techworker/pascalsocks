@@ -1,6 +1,6 @@
 const assert = require('assert');
-const SubscriptionManager = require('../lib/SubscriptionManager');
-const Subscription = require('../lib/Subscription');
+const SubscriptionManager = require('../src/Server/SubscriptionManager');
+const Subscription = require('../src/Server/Subscription');
 const Hashids = require('hashids');
 
 describe('SubscriptionManager', function()

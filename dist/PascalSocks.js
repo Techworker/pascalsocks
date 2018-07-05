@@ -121,7 +121,8 @@ module.exports = {
     SubscriptionError: __webpack_require__(/*! ./src/Events/SubscriptionError */ "./src/Events/SubscriptionError.js"),
     SubscriptionSubscribed: __webpack_require__(/*! ./src/Events/SubscriptionSuccess */ "./src/Events/SubscriptionSuccess.js"),
     Transaction: __webpack_require__(/*! ./src/Events/Transaction */ "./src/Events/Transaction.js"),
-    Welcome: __webpack_require__(/*! ./src/Events/Welcome */ "./src/Events/Welcome.js")
+    Welcome: __webpack_require__(/*! ./src/Events/Welcome */ "./src/Events/Welcome.js"),
+    Ping: __webpack_require__(/*! ./src/Events/Ping */ "./src/Events/Ping.js")
   },
   Types: {
     Account: __webpack_require__(/*! ./src/Types/Account */ "./src/Types/Account.js"),
@@ -13609,7 +13610,7 @@ function () {
       // create new guid to identify the subscription
       var ident = helper.guid(); // the promise to be executed
 
-      var promise = new Promise(function (resolve, reject) {
+      return new Promise(function (resolve, reject) {
         // add a new onmessage handler that will check any given message
         // and if the ident matches AND it is a successful or errornous
         // subscription, we will resolve the promise and remove the
@@ -13629,15 +13630,35 @@ function () {
             reject(data);
           }
         });
+
+        _this2.socket.send(JSON.stringify({
+          action: 'subscribe',
+          snapshot: snapshot,
+          event: event,
+          ident: ident,
+          filters: filters
+        }));
       });
-      this.socket.send(JSON.stringify({
-        action: 'subscribe',
-        snapshot: snapshot,
-        event: event,
-        ident: ident,
-        filters: filters
-      }));
-      return promise;
+    }
+    /**
+     * Subscribes to the given event.
+     *
+     * @param {String} event
+     * @param {Array} filters
+     * @param {Function} callback
+     * @returns {Promise}
+     */
+
+  }, {
+    key: "once",
+    value: function once(event, filters, callback) {
+      var _this3 = this;
+
+      this.subscribe(event, 0, filters, function (data) {
+        _this3.onMessageHandlers.delete(data.ident);
+
+        callback(data);
+      });
     }
   }]);
 
@@ -15619,6 +15640,116 @@ module.exports = OperationPending;
 
 /***/ }),
 
+/***/ "./src/Events/Ping.js":
+/*!****************************!*\
+  !*** ./src/Events/Ping.js ***!
+  \****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) Benjamin Ansbach - all rights reserved.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } } function _next(value) { step("next", value); } function _throw(err) { step("throw", err); } _next(); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var AbstractEvent = __webpack_require__(/*! ../Event */ "./src/Event.js");
+/**
+ * The event gets fired when an account is bought on the chain.
+ */
+
+
+var Ping =
+/*#__PURE__*/
+function (_AbstractEvent) {
+  _inherits(Ping, _AbstractEvent);
+
+  _createClass(Ping, null, [{
+    key: "name",
+
+    /**
+       * Gets the name of the event.
+       *
+       * @return {String}
+       */
+    value: function name() {
+      return 'ping';
+    }
+    /**
+       * Creates a new instance of the Ping class.
+       */
+
+  }]);
+
+  function Ping() {
+    _classCallCheck(this, Ping);
+
+    return _possibleConstructorReturn(this, (Ping.__proto__ || Object.getPrototypeOf(Ping)).call(this, 'PING'));
+  }
+  /**
+     * Gets the serialized version of this event.
+     *
+     * @param {BlockChain} chain
+     * @returns {Object}
+     */
+
+
+  _createClass(Ping, [{
+    key: "serializeEvent",
+    value: function () {
+      var _ref = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(chain) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", {});
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function serializeEvent(_x) {
+        return _ref.apply(this, arguments);
+      }
+
+      return serializeEvent;
+    }()
+  }]);
+
+  return Ping;
+}(AbstractEvent);
+
+module.exports = Ping;
+
+/***/ }),
+
 /***/ "./src/Events/SubscriptionError.js":
 /*!*****************************************!*\
   !*** ./src/Events/SubscriptionError.js ***!
@@ -15802,7 +15933,7 @@ function (_AbstractEvent) {
 
     _classCallCheck(this, SubscriptionSuccess);
 
-    _this = _possibleConstructorReturn(this, (SubscriptionSuccess.__proto__ || Object.getPrototypeOf(SubscriptionSuccess)).call(this, "Subscribed to channel ".concat(subscription.channel, " and event ").concat(subscription.eventName)));
+    _this = _possibleConstructorReturn(this, (SubscriptionSuccess.__proto__ || Object.getPrototypeOf(SubscriptionSuccess)).call(this, "Subscribed to event ".concat(subscription.event)));
     _this._subscription = subscription;
     return _this;
   }

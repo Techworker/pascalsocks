@@ -29,7 +29,7 @@ class SubscriptionSuccess extends AbstractEvent {
      * @param {Subscription} subscription
      */
   constructor(subscription) {
-    super(`Subscribed to channel ${subscription.channel} and event ${subscription.eventName}`);
+    super(`Subscribed to event ${subscription.event}`);
 
     this._subscription = subscription;
   }

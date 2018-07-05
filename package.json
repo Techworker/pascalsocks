@@ -1,15 +1,12 @@
 {
   "scripts": {
-    "build-no-test": "webpack --env dev && webpack --env build",
+    "build-no-test": "webpack --env build",
     "build": "webpack --env dev && webpack --env build && npm run test",
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "nyc mocha"
   },
   "dependencies": {
     "bignumber.js": "^6.0.0",
-    "cloc": "^2.3.3",
-    "dotenv": "^5.0.1",
-    "hashids": "^1.1.4",
     "interval-promise": "^1.2.0",
     "jayson": "^2.0.5",
     "unirest": "^0.5.1",

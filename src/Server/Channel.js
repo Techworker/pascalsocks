@@ -85,7 +85,7 @@ class Channel {
   subscribed(subscription) {
     // get all snapshot events
     const snapshotEvents = this.eventMgr.getEvents(
-      subscription.eventName, subscription.snapshot
+      subscription.event, subscription.snapshot
     );
 
     snapshotEvents.forEach((event) => {
@@ -95,7 +95,7 @@ class Channel {
     });
 
     // get all snapshot events from the recent events
-    const recentEvents = this.eventMgr.getRecentEvents(subscription.eventName);
+    const recentEvents = this.eventMgr.getRecentEvents(subscription.event);
 
     recentEvents.forEach((event) => {
       if (subscription.eventApplies(event)) {

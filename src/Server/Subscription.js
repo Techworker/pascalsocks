@@ -15,14 +15,14 @@ class Subscription {
      *
      * @param {String} clientId
      * @param {String} ident
-     * @param {String} eventName
+     * @param {String} event
      * @param {String} snapshot
      * @param {Array} filters
      */
-  constructor(clientId, ident, eventName, snapshot, filters = []) {
+  constructor(clientId, ident, event, snapshot, filters = []) {
     this._clientId = clientId;
     this._ident = ident;
-    this._eventName = eventName;
+    this._event = event;
     this._snapshot = snapshot;
     this._filters = new EventFilter(filters);
     this._active = false;
@@ -51,8 +51,8 @@ class Subscription {
      *
      * @returns {String}
      */
-  get eventName() {
-    return this._eventName;
+  get event() {
+    return this._event;
   }
 
   /**
@@ -127,7 +127,7 @@ class Subscription {
     return {
       clientId: this.clientId,
       ident: this.ident,
-      eventName: this.eventName,
+      event: this.event,
       snapshot: this.snapshot,
       filters: this.filters.serialize()
     };

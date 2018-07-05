@@ -8,6 +8,7 @@
 'use strict';
 
 const AccountNumber = require('../Types/AccountNumber');
+const interval = require('interval-promise');
 
 const helper = require('../helper');
 
@@ -32,6 +33,7 @@ const EventTransaction = require('../Events/Transaction');
 
 // internal events
 const EventInternalSeal = require('../Events/InternalSeal');
+const EventPing = require('../Events/Ping');
 
 // additional information for operations
 const OperationInfoTransaction = require('../Types/OperationInfo/Transaction');
@@ -55,7 +57,7 @@ class BlockChain {
      * Creates a new instance of the BlockChain class.
      *
      * @param {EventManager} eventMgr
-     * @param {PascalRPCClient} rpcClient
+     * @param {RPC} rpcClient
      */
   constructor(eventMgr, rpcClient) {
     this.eventMgr = eventMgr;
@@ -67,6 +69,12 @@ class BlockChain {
     this.accounts = new Map();
     this.publicKeys = new Map();
     this.latestBlock = null;
+
+    interval(async () => {
+      await this.emitEvent(
+        new EventPing()
+      );
+    }, 5000);
   }
 
   /**

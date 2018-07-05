@@ -15,6 +15,7 @@ const Channel = require('./src/Server/Channel');
 const Config = require('./src/Server/Config');
 
 const EventBlockMined = require('./src/Events/BlockMined');
+const EventPing = require('./src/Events/Ping');
 
 const EventOperationMatured = require('./src/Events/OperationMatured');
 const EventOperationPending = require('./src/Events/OperationPending');
@@ -60,6 +61,7 @@ new Server(
     EventAccountChangeName,
     EventAccountChangeType,
     EventAccountDelist,
-    EventAccountForSale
+    EventAccountForSale,
+    EventPing
   ], eventMgr, subscriptionManager)
 ).run();
