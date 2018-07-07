@@ -1,6 +1,6 @@
 const helper = require('../helper');
-const EventSubscriptionSuccess = require('../Events/SubscriptionSuccess');
-const EventSubscriptionError = require('../Events/SubscriptionError');
+const EventSubscriptionSuccess = require('../Events/SubscribeSuccess');
+const EventSubscriptionError = require('../Events/SubscribeError');
 const EventWelcome = require('../Events/Welcome');
 
 /**
@@ -97,6 +97,7 @@ class Client {
   onMessage(event) {
     const parsed = JSON.parse(event.data);
 
+    console.log(event.data);
     if (this.subscriptionHandlers[parsed.ident] !== undefined) {
       this.subscriptionHandlers[parsed.ident](parsed);
     }
@@ -123,6 +124,7 @@ class Client {
       // message handler.
       this.subscriptionHandlers.set(ident, (data) => {
         if (data.ident === ident && data.event === EventSubscriptionSuccess.name()) {
+          // resolve first so the subscription can be saved
           resolve(data.ident);
           this.subscriptionHandlers.set(ident, (data) => {
             if (data.ident === ident && data.event === event) {
@@ -130,6 +132,8 @@ class Client {
             }
           });
         }
+
+        // something went wrong, we will reject it
         if (data.ident === ident && data.event === EventSubscriptionError.name()) {
           reject(data);
         }
@@ -152,10 +156,19 @@ class Client {
    * @returns {Promise}
    */
   once(event, filters, callback) {
+    let onceSubscriptionId;
+
     this.subscribe(event, 0, filters, (data) => {
-      this.subscriptionHandlers.delete(data.ident);
+      this.subscriptionHandlers.delete(onceSubscriptionId);
       callback(data);
-    });
+    }).then(subscriptionId => (onceSubscriptionId = subscriptionId));
+  }
+
+  unsubscribe(subscriptionId) {
+    this.subscriptionHandlers.delete(subscriptionId);
+    this.socket.send(JSON.stringify({
+      action: 'unsubscribe'
+    }));
   }
 }
 

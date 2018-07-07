@@ -1,6 +1,3 @@
-// npm
-const Hashids = require('hashids');
-
 const Server = require('./src/Server/Server');
 
 // lib
@@ -33,11 +30,10 @@ const EventAccountForSale = require('./src/Events/AccountForSale');
 const EventTransaction = require('./src/Events/Transaction');
 
 const config = Config.fromEnv();
-const hashIds = new Hashids(config.hashidsHash);
 const eventMgr = new EventManager();
 const rpc = new RPC(config.host, config.port);
 const chain = new BlockChain(eventMgr, rpc);
-const subscriptionManager = new SubscriptionManager(hashIds);
+const subscriptionManager = new SubscriptionManager();
 
 new Server(
   config,

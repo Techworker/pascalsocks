@@ -10,14 +10,14 @@
 const Subscription = require('./Subscription');
 
 /**
- * A simple manager object that handles clientId subscriptions for channels.
+ * A simple manager object that manages subscriptions.
  */
 class SubscriptionManager {
   /**
      * Constructor.
      */
   constructor() {
-    this.subscriptions = [];
+    this.subscriptions = new Map();
   }
 
   /**
@@ -28,29 +28,28 @@ class SubscriptionManager {
      * @param {String} ident
      * @param {String} event
      * @param {Number} snapshot
-     * @param {Object} filters
+     * @param {Array} filters
      * @returns {Subscription}
      */
-  subscribe(clientId, ident, event, snapshot, filters = []) {
+  subscribe(clientId, ident, event, snapshot, filters = [])
+  {
     const subscription = new Subscription(
       clientId, ident, event, snapshot, filters
     );
 
-    this.subscriptions.push(subscription);
+    this.subscriptions[ident] = subscription;
 
     return subscription;
   }
 
   /**
-     * Removes the given subscription.
-     *
-     * @param {Subscription} subscription
-     */
-  unsubscribe(subscription) {
-    this.unsubscribeIdent(
-      subscription.clientId,
-      subscription.ident
-    );
+   * Gets a value indicating whether the manager has the given ident.
+   *
+   * @param {String} ident
+   * @returns {boolean}
+   */
+  hasIdent(ident) {
+    return this.subscriptions.has(ident);
   }
 
   /**
@@ -59,34 +58,33 @@ class SubscriptionManager {
    * @param {String} clientId
    */
   unsubscribeClientId(clientId) {
-    let removed = [];
+    let toRemove = [];
 
-    this.subscriptions = this.subscriptions.filter(sub => {
-      let keep = (sub.clientId !== clientId);
+    for (let [ident, subscription] of this.subscriptions) {
+      if (subscription.isClientId(clientId)) {
+        toRemove.push(ident);
+      }
+    }
 
-      if (!keep) removed.push(sub);
-      return keep;
-    });
-
-    return removed;
+    toRemove.forEach(ident => this.subscriptions.delete(ident));
   }
 
   /**
-   * Removes all subscriptions of the given clientId.
+   * Removes all subscriptions of the given clientId and event.
    *
    * @param {String} clientId
+   * @param {String} event
    */
   unsubscribeEvent(clientId, event) {
-    let removed = [];
+    let toRemove = [];
 
-    this.subscriptions = this.subscriptions.filter(sub => {
-      let keep = (sub.event === event && sub.clientId === clientId);
+    for (let [ident, subscription] of this.subscriptions) {
+      if (subscription.clientId === clientId && subscription.event === event) {
+        toRemove.push(ident);
+      }
+    }
 
-      if (!keep) removed.push(sub);
-      return keep;
-    });
-
-    return removed;
+    toRemove.forEach(ident => this.subscriptions.delete(ident));
   }
 
   /**
@@ -94,46 +92,52 @@ class SubscriptionManager {
      * the removed ones.
      *
      * @param {String} clientId
-     * @param {String} channel
+     * @param {String} ident
      *
      * @return {Array<Subscription>}
      */
-  unsubscribeIdent(clientId, event, ident) {
-    let removed = [];
+  unsubscribeIdent(clientId, ident) {
+    let toRemove = [];
 
-    this.subscriptions = this.subscriptions.filter(sub => {
-      let keep = !(sub.clientId !== clientId && sub.event !== event && sub.ident !== ident);
+    for (let [, subscription] of this.subscriptions) {
+      if (subscription.clientId === clientId && subscription.ident === ident) {
+        toRemove.push(ident);
+      }
+    }
 
-      if (!keep) removed.push(sub);
-      return keep;
-    });
-    // console.log(this.subscriptions);
-
-    return removed;
+    toRemove.forEach(ident => this.subscriptions.delete(ident));
   }
 
   /**
-     * Gets all subscriptions of the given clientId.
-     *
-     * @param {String} clientId
-     * @returns {Array<Subscription>}
-     */
-  getSubscriptionsOfClientId(clientId) {
-    return this.subscriptions.filter(
-      sub => sub.isClientId(clientId) && sub.isActive()
-    );
-  }
-
-  /**
-     * Gets all subscriptions of the given channel.
-     *
-     * @param {String} event
-     * @returns {Array<Subscription>}
-     */
+   * Gets all subscriptions of the given channel.
+   *
+   * @param {String} event
+   * @returns {Array<Subscription>}
+   */
   getSubscriptionsOfEvent(event) {
-    return this.subscriptions.filter(
-      sub => sub.event === event && sub.isActive()
-    );
+    let subscriptions = [];
+
+    for (let [, subscription] of this.subscriptions) {
+      if (subscription.event === event) {
+        subscriptions.push(subscription);
+      }
+    }
+
+    return subscriptions;
+  }
+
+  /**
+   * Gets the subscription of the given ident.
+   *
+   * @param {String} ident
+   * @returns {Subscription|null}
+   */
+  getSubscription(ident) {
+    if (this.hasIdent(ident)) {
+      return this.subscriptions.get(ident);
+    }
+
+    return null;
   }
 }
 

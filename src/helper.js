@@ -29,7 +29,11 @@ function guid() {
  * @param {Function} callback
  */
 async function send(socket, ident, event, callback) {
-  const s = Object.assign(await event.serialized(), {ident});
+  const s = await event.serialized();
+
+  if (ident !== null) {
+    s.ident = ident;
+  }
 
   socket.send(JSON.stringify(s), callback);
 }

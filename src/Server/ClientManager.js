@@ -46,10 +46,10 @@ class ClientManager {
      * Gets the clientId identified by the given socket connection.
      *
      * @param {WebSocket} socket
-     * @returns {WebSocket}
+     * @returns {String}
      */
   getClientIdBySocket(socket) {
-    return this.clients.get(socket.__pascal.uuid);
+    return socket.__pascal.uuid;
   }
 
   /**

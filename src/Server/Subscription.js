@@ -74,17 +74,6 @@ class Subscription {
   }
 
   /**
-     * Gets a value indicating whether the given clientId id equals the recent
-     * clientId id.
-     *
-     * @param {String} clientId
-     * @returns {boolean}
-     */
-  isClientId(clientId) {
-    return this.clientId === clientId;
-  }
-
-  /**
      * Gets a value indicating whether the subscription is active.
      *
      * @returns {boolean}

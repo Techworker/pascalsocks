@@ -82,7 +82,7 @@ class Channel {
      *
      * @param subscription
      */
-  subscribed(subscription) {
+  snapshot(subscription) {
     // get all snapshot events
     const snapshotEvents = this.eventMgr.getEvents(
       subscription.event, subscription.snapshot

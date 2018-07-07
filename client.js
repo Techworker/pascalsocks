@@ -13,8 +13,8 @@ module.exports = {
     OperationMatured: require('./src/Events/OperationMatured'),
     OperationNotIncluded: require('./src/Events/OperationNotIncluded'),
     OperationPending: require('./src/Events/OperationPending'),
-    SubscriptionError: require('./src/Events/SubscriptionError'),
-    SubscriptionSubscribed: require('./src/Events/SubscriptionSuccess'),
+    SubscriptionError: require('./src/Events/SubscribeError'),
+    SubscriptionSubscribed: require('./src/Events/SubscribeSuccess'),
     Transaction: require('./src/Events/Transaction'),
     Welcome: require('./src/Events/Welcome'),
     Ping: require('./src/Events/Ping')

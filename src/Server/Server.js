@@ -2,13 +2,14 @@
 const WebSocket = require('ws');
 
 // lib
-const helper = require('./../helper');
+const helper = require('../helper');
 
 const Subscription = require('./Subscription');
 
 const EventWelcome = require('../Events/Welcome');
-const EventSubscriptionSuccess = require('../Events/SubscriptionSuccess');
-const EventSubscriptionError = require('../Events/SubscriptionError');
+const EventError = require('../Events/Error');
+const EventSubscriptionSuccess = require('../Events/SubscribeSuccess');
+const EventSubscriptionError = require('../Events/SubscribeError');
 
 /**
  * The server class which is the entrypoint of the application.
@@ -42,13 +43,13 @@ class Server {
     this.chainLoader = chainLoader;
     this.channel = channel;
 
-    // this is fixed..
+    // TODO: this is fixed..
     this.webSocketServer = new WebSocket.Server({ port: config.wsPort });
   }
 
   /**
-     * Starts the server.
-     */
+    * Starts the server.
+    */
   run() {
     // load history first
     this.chainLoader.load(this.config.blockLookBack).then(() => {
@@ -113,7 +114,7 @@ class Server {
      * @param {WebSocket} webSocket
      */
   async onConnection(webSocket) {
-    // register the clientId and send him a nice welcome and his uuid
+    // register the client and send him a nice welcome and his uuid
     let uuid = this.clientManager.addClient(webSocket);
     const event = new EventWelcome(uuid);
 
@@ -125,12 +126,12 @@ class Server {
   }
 
   /**
-     * Handles a JSON encoded string message from the client to the server
-     * (subscription, ..)
-     *
-     * @param {String} message
-     * @param {WebSocket} webSocket
-     */
+   * Handles a JSON encoded string message from the client to the server
+   * (subscription, ..)
+   *
+   * @param {String} message
+   * @param {WebSocket} webSocket
+   */
   async onMessage(message, webSocket) {
     let msg;
 
@@ -138,51 +139,109 @@ class Server {
       // parse the message and see if its of type json
       msg = JSON.parse(message);
     } catch (e) {
-      // TODO: use helper.send with a custom event
-      webSocket.send(JSON.stringify({
-        error: true,
-        message: 'Unable to parse message: ' + message
-      }));
+      const errorEvent = new EventError('Unable to parse message: ' + message);
+
+      await errorEvent.serialize();
+      helper.send(webSocket, null, errorEvent, () => false);
       return;
     }
 
-    // subscription
+    // service is still intializing
+    if (!this.readyToConnect) {
+      const errorEvent = new EventSubscriptionError('Initializing service, please try again later');
+
+      await errorEvent.serialize();
+      this.eventMgr.notify(errorEvent, [webSocket]);
+      return;
+    }
+
+    // now try to evaluate what the client wants
+    switch (msg.action) {
+      case 'subscribe':
+        this.subscribe(msg, webSocket);
+        break;
+      case 'unsubscribe':
+        this.unsubscribe(msg, webSocket);
+        break;
+      default:
+        const errorEvent = new EventError(`Unknown action: ${msg.action}`);
+
+        await errorEvent.serialize();
+        this.eventMgr.notify(errorEvent, [webSocket]);
+        return;
+    }
+  }
+
+  /**
+   * Subscribes a client based on the given message.
+   *
+   * @param {Object} msg
+   * @param {WebSocket} webSocket
+   */
+  async subscribe(msg, webSocket) {
+    // handle a subscription
     if (msg.action === 'subscribe') {
-      if (!this.readyToConnect) {
-        const errorEvent = new EventSubscriptionError('Initializing service, please try again later');
-
-        await errorEvent.serialize();
-        this.eventMgr.notify(errorEvent, [webSocket]);
-        return;
-      }
-
-      // check if the channel is given and registered
+      // check if the client set its own ident, if not we will create one
       if (msg.ident === undefined) {
-        const errorEvent = new EventSubscriptionError('Unable to subscribe without an ident');
-
-        await errorEvent.serialize();
-        this.eventMgr.notify(errorEvent, [webSocket]);
-        return;
+        do {
+          msg.ident = helper.guid();
+        } while (this.subscriptionManager.hasIdent(msg.ident));
       }
+
 
       // now subscribe the user
-      // TODO: Implementation detail
       const subscription = this.subscriptionManager.subscribe(
-        webSocket.__pascal.uuid, msg.ident, msg.event, msg.snapshot, msg.filters || []
+        this.clientManager.getClientIdBySocket(webSocket),
+        msg.ident,
+        msg.event,
+        msg.snapshot,
+        msg.filters || []
       );
 
+      // .. and send the subscribed event
       const subscribedEvent = new EventSubscriptionSuccess(subscription);
 
       await subscribedEvent.serialize();
       this.eventMgr.notify(subscribedEvent, [subscription]);
 
-      // we will check if the channel has a subscribed method and call it.
-      // This way the channel can react to a new subscription and probably
-      // send a snapshot and such.
-      this.channel.subscribed(subscription);
+      // send snapshots
+      this.channel.snapshot(subscription);
+
+      // ..and activate the channel (not before the snapshots are sent)
       subscription.activate();
     }
   }
+
+  /**
+   * Unsubscribes a client based on the given ident.
+   *
+   * @param {Object} msg
+   * @param {WebSocket} webSocket
+   */
+  async unsubscribe(msg, webSocket) {
+    // check if the client set its own ident, if we will unsubscribe the client
+    // from everything
+    if (msg.ident === undefined) {
+
+      const errorEvent = new EventError(`Please set the ident of the subscription you want to unsubscribe from`);
+
+      await errorEvent.serialize();
+      this.eventMgr.notify(errorEvent, [webSocket]);
+      return;
+    }
+
+    if (this.subscriptionManager.hasIdent(msg.ident)) {
+      const subscription = this.subscriptionManager.getSubscription(msg.ident);
+
+      subscription.deactivate();
+      this.subscriptionManager.unsubscribeIdent(webSocket.__pascal.uuid, msg.ident);
+      const errorEvent = new EventError(`Please set the ident of the subscription you want to unsubscribe from`);
+
+      await errorEvent.serialize();
+      this.eventMgr.notify(errorEvent, [webSocket]);
+    }
+  }
+
 }
 
 module.exports = Server;

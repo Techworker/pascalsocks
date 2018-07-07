@@ -118,8 +118,8 @@ module.exports = {
     OperationMatured: __webpack_require__(/*! ./src/Events/OperationMatured */ "./src/Events/OperationMatured.js"),
     OperationNotIncluded: __webpack_require__(/*! ./src/Events/OperationNotIncluded */ "./src/Events/OperationNotIncluded.js"),
     OperationPending: __webpack_require__(/*! ./src/Events/OperationPending */ "./src/Events/OperationPending.js"),
-    SubscriptionError: __webpack_require__(/*! ./src/Events/SubscriptionError */ "./src/Events/SubscriptionError.js"),
-    SubscriptionSubscribed: __webpack_require__(/*! ./src/Events/SubscriptionSuccess */ "./src/Events/SubscriptionSuccess.js"),
+    SubscriptionError: __webpack_require__(/*! ./src/Events/SubscribeError */ "./src/Events/SubscribeError.js"),
+    SubscriptionSubscribed: __webpack_require__(/*! ./src/Events/SubscribeSuccess */ "./src/Events/SubscribeSuccess.js"),
     Transaction: __webpack_require__(/*! ./src/Events/Transaction */ "./src/Events/Transaction.js"),
     Welcome: __webpack_require__(/*! ./src/Events/Welcome */ "./src/Events/Welcome.js"),
     Ping: __webpack_require__(/*! ./src/Events/Ping */ "./src/Events/Ping.js")
@@ -12709,13 +12709,16 @@ module.exports = __webpack_require__(/*! ./modules/_core */ "./node_modules/core
   !*** ./node_modules/regenerator-runtime/runtime.js ***!
   \*****************************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
+/* WEBPACK VAR INJECTION */(function(global) {/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
  *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
+ * This source code is licensed under the BSD-style license found in the
+ * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
+ * additional grant of patent rights can be found in the PATENTS file in
+ * the same directory.
  */
 
 !(function(global) {
@@ -12898,6 +12901,10 @@ module.exports = __webpack_require__(/*! ./modules/_core */ "./node_modules/core
           resolve(result);
         }, reject);
       }
+    }
+
+    if (typeof global.process === "object" && global.process.domain) {
+      invoke = global.process.domain.bind(invoke);
     }
 
     var previousPromise;
@@ -13433,12 +13440,15 @@ module.exports = __webpack_require__(/*! ./modules/_core */ "./node_modules/core
     }
   };
 })(
-  // In sloppy mode, unbound `this` refers to the global object, fallback to
-  // Function constructor if we're in global strict mode. That is sadly a form
-  // of indirect eval which violates Content Security Policy.
-  (function() { return this })() || Function("return this")()
+  // Among the various tricks for obtaining a reference to the global
+  // object, this seems to be the most reliable technique that does not
+  // use indirect eval (which violates Content Security Policy).
+  typeof global === "object" ? global :
+  typeof window === "object" ? window :
+  typeof self === "object" ? self : this
 );
 
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -13488,14 +13498,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var helper = __webpack_require__(/*! ../helper */ "./src/helper.js");
 
-var EventSubscriptionSuccess = __webpack_require__(/*! ../Events/SubscriptionSuccess */ "./src/Events/SubscriptionSuccess.js");
+var EventSubscriptionSuccess = __webpack_require__(/*! ../Events/SubscribeSuccess */ "./src/Events/SubscribeSuccess.js");
 
-var EventSubscriptionError = __webpack_require__(/*! ../Events/SubscriptionError */ "./src/Events/SubscriptionError.js");
+var EventSubscriptionError = __webpack_require__(/*! ../Events/SubscribeError */ "./src/Events/SubscribeError.js");
 
 var EventWelcome = __webpack_require__(/*! ../Events/Welcome */ "./src/Events/Welcome.js");
 /**
  * A pascalsocks client that should simplify the development of JS based
- * applications and can also serve as an implementation base.
+ * applications and can also serve as an implementation boilerplate for other
+ * languages.
  */
 
 
@@ -13516,7 +13527,7 @@ function () {
     this.clientId = null; // handlers which are active and will all be called when the websocket sends
     // a new message
 
-    this.onMessageHandlers = new Map(); // a flag indicating whether we are trying to connect
+    this.subscriptionHandlers = new Map(); // a flag indicating whether we are trying to connect
 
     this.inConnect = false; // A flag indicating that we have a connection error
 
@@ -13535,8 +13546,8 @@ function () {
       var _this = this;
 
       return new Promise(function (resolve, reject) {
-        // set inconnect flag
-        _this.inConnect = true;
+        // set inConnect flag
+        _this.inConnect = true; // try to establish connection
 
         try {
           _this.socket = new WebSocket('ws://' + _this.hostPort);
@@ -13567,16 +13578,16 @@ function () {
         }; // listen to 'welcome' message and then remove listener
 
 
-        _this.onMessageHandlers.set('welcome', function (message) {
+        _this.subscriptionHandlers.set('welcome', function (message) {
           if (message.event === EventWelcome.name()) {
-            _this.onMessageHandlers.delete('welcome');
+            _this.subscriptionHandlers.delete('welcome');
 
             _this.clientId = message.id;
             resolve(message);
           }
         });
 
-        _this.socket.onopen = function (event) {
+        _this.socket.onopen = function () {
           // add the simple listener
           _this.socket.onmessage = function (event) {
             return _this.onMessage(event);
@@ -13584,13 +13595,21 @@ function () {
         };
       });
     }
+    /**
+     * Gets called whenever the socket receives a message.
+     *
+     * @param {Object} event
+     */
+
   }, {
     key: "onMessage",
     value: function onMessage(event) {
       var parsed = JSON.parse(event.data);
-      this.onMessageHandlers.forEach(function (handler, key) {
-        return handler(parsed, key);
-      });
+      console.log(event.data);
+
+      if (this.subscriptionHandlers[parsed.ident] !== undefined) {
+        this.subscriptionHandlers[parsed.ident](parsed);
+      }
     }
     /**
      * Subscribes to the given event.
@@ -13615,16 +13634,18 @@ function () {
         // and if the ident matches AND it is a successful or errornous
         // subscription, we will resolve the promise and remove the
         // message handler.
-        _this2.onMessageHandlers.set(ident, function (data) {
+        _this2.subscriptionHandlers.set(ident, function (data) {
           if (data.ident === ident && data.event === EventSubscriptionSuccess.name()) {
-            _this2.onMessageHandlers.set(ident, function (data) {
+            // resolve first so the subscription can be saved
+            resolve(data.ident);
+
+            _this2.subscriptionHandlers.set(ident, function (data) {
               if (data.ident === ident && data.event === event) {
                 callback(data);
               }
             });
+          } // something went wrong, we will reject it
 
-            resolve(data);
-          }
 
           if (data.ident === ident && data.event === EventSubscriptionError.name()) {
             reject(data);
@@ -13654,11 +13675,22 @@ function () {
     value: function once(event, filters, callback) {
       var _this3 = this;
 
+      var onceSubscriptionId;
       this.subscribe(event, 0, filters, function (data) {
-        _this3.onMessageHandlers.delete(data.ident);
+        _this3.subscriptionHandlers.delete(onceSubscriptionId);
 
         callback(data);
+      }).then(function (subscriptionId) {
+        return onceSubscriptionId = subscriptionId;
       });
+    }
+  }, {
+    key: "unsubscribe",
+    value: function unsubscribe(subscriptionId) {
+      this.subscriptionHandlers.delete(subscriptionId);
+      this.socket.send(JSON.stringify({
+        action: 'unsubscribe'
+      }));
     }
   }]);
 
@@ -15750,10 +15782,10 @@ module.exports = Ping;
 
 /***/ }),
 
-/***/ "./src/Events/SubscriptionError.js":
-/*!*****************************************!*\
-  !*** ./src/Events/SubscriptionError.js ***!
-  \*****************************************/
+/***/ "./src/Events/SubscribeError.js":
+/*!**************************************!*\
+  !*** ./src/Events/SubscribeError.js ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15791,12 +15823,12 @@ var AbstractEvent = __webpack_require__(/*! ../Event */ "./src/Event.js");
  */
 
 
-var Error =
+var SubscribeError =
 /*#__PURE__*/
 function (_AbstractEvent) {
-  _inherits(Error, _AbstractEvent);
+  _inherits(SubscribeError, _AbstractEvent);
 
-  _createClass(Error, null, [{
+  _createClass(SubscribeError, null, [{
     key: "name",
 
     /**
@@ -15815,10 +15847,10 @@ function (_AbstractEvent) {
 
   }]);
 
-  function Error(message) {
-    _classCallCheck(this, Error);
+  function SubscribeError(message) {
+    _classCallCheck(this, SubscribeError);
 
-    return _possibleConstructorReturn(this, (Error.__proto__ || Object.getPrototypeOf(Error)).call(this, message));
+    return _possibleConstructorReturn(this, (SubscribeError.__proto__ || Object.getPrototypeOf(SubscribeError)).call(this, message));
   }
   /**
      * Gets the serialized version of this event.
@@ -15828,7 +15860,7 @@ function (_AbstractEvent) {
      */
 
 
-  _createClass(Error, [{
+  _createClass(SubscribeError, [{
     key: "serializeEvent",
     value: function () {
       var _ref = _asyncToGenerator(
@@ -15856,17 +15888,17 @@ function (_AbstractEvent) {
     }()
   }]);
 
-  return Error;
+  return SubscribeError;
 }(AbstractEvent);
 
-module.exports = Error;
+module.exports = SubscribeError;
 
 /***/ }),
 
-/***/ "./src/Events/SubscriptionSuccess.js":
-/*!*******************************************!*\
-  !*** ./src/Events/SubscriptionSuccess.js ***!
-  \*******************************************/
+/***/ "./src/Events/SubscribeSuccess.js":
+/*!****************************************!*\
+  !*** ./src/Events/SubscribeSuccess.js ***!
+  \****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15904,12 +15936,12 @@ var AbstractEvent = __webpack_require__(/*! ../Event */ "./src/Event.js");
  */
 
 
-var SubscriptionSuccess =
+var SubscribeSuccess =
 /*#__PURE__*/
 function (_AbstractEvent) {
-  _inherits(SubscriptionSuccess, _AbstractEvent);
+  _inherits(SubscribeSuccess, _AbstractEvent);
 
-  _createClass(SubscriptionSuccess, null, [{
+  _createClass(SubscribeSuccess, null, [{
     key: "name",
 
     /**
@@ -15928,12 +15960,12 @@ function (_AbstractEvent) {
 
   }]);
 
-  function SubscriptionSuccess(subscription) {
+  function SubscribeSuccess(subscription) {
     var _this;
 
-    _classCallCheck(this, SubscriptionSuccess);
+    _classCallCheck(this, SubscribeSuccess);
 
-    _this = _possibleConstructorReturn(this, (SubscriptionSuccess.__proto__ || Object.getPrototypeOf(SubscriptionSuccess)).call(this, "Subscribed to event ".concat(subscription.event)));
+    _this = _possibleConstructorReturn(this, (SubscribeSuccess.__proto__ || Object.getPrototypeOf(SubscribeSuccess)).call(this, "Subscribed to event ".concat(subscription.event)));
     _this._subscription = subscription;
     return _this;
   }
@@ -15944,7 +15976,7 @@ function (_AbstractEvent) {
      */
 
 
-  _createClass(SubscriptionSuccess, [{
+  _createClass(SubscribeSuccess, [{
     key: "serializeEvent",
 
     /**
@@ -15986,10 +16018,10 @@ function (_AbstractEvent) {
     }
   }]);
 
-  return SubscriptionSuccess;
+  return SubscribeSuccess;
 }(AbstractEvent);
 
-module.exports = SubscriptionSuccess;
+module.exports = SubscribeSuccess;
 
 /***/ }),
 
@@ -20680,19 +20712,19 @@ var send = function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.t0 = Object;
-            _context.next = 3;
+            _context.next = 2;
             return event.serialized();
 
-          case 3:
-            _context.t1 = _context.sent;
-            _context.t2 = {
-              ident: ident
-            };
-            s = _context.t0.assign.call(_context.t0, _context.t1, _context.t2);
+          case 2:
+            s = _context.sent;
+
+            if (ident !== null) {
+              s.ident = ident;
+            }
+
             socket.send(JSON.stringify(s), callback);
 
-          case 7:
+          case 5:
           case "end":
             return _context.stop();
         }

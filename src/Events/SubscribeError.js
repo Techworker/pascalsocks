@@ -13,7 +13,7 @@ const AbstractEvent = require('../Event');
  * The error event that is sent to a client if a subscription was
  * successful.
  */
-class Error extends AbstractEvent {
+class SubscribeError extends AbstractEvent {
   /**
      * Gets the name of the event.
      *
@@ -43,4 +43,4 @@ class Error extends AbstractEvent {
   }
 }
 
-module.exports = Error;
+module.exports = SubscribeError;
